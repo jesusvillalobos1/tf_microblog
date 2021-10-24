@@ -52,7 +52,7 @@ resource "aws_subnet" "application-subnet-2" {
   }
 }
 
-# Create Database Private Subnet
+#Create Database Private Subnet
 resource "aws_subnet" "database-subnet-1" {
   vpc_id            = aws_vpc.app_vpc.id
   cidr_block        = "10.0.21.0/24"
