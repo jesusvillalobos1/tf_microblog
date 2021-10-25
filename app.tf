@@ -98,12 +98,39 @@ resource "aws_route_table" "web-rt" {
 }
  
 # Create Web Subnet association with Web route table
-resource "aws_route_table_association" "a" {
+resource "aws_route_table_association" "web_net_assoc1" {
   subnet_id      = aws_subnet.web-subnet-1.id
   route_table_id = aws_route_table.web-rt.id
 }
  
-resource "aws_route_table_association" "b" {
+resource "aws_route_table_association" "web_net_assoc2" {
   subnet_id      = aws_subnet.web-subnet-2.id
   route_table_id = aws_route_table.web-rt.id
+}
+
+###This key must be encrypted
+resource "aws_key_pair" "rafael_key" {
+  key_name   = "rafael_key"
+  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEb5x7YXs73HpA5Keyo1E/qRbzL98jR8knONXmh8yEdv Rafael Rojas big-bertha"
+}
+
+#Hardcoded AMI image, it shoud have a dictionary for dynamic find
+resource "aws_launch_configuration" "app_lcfg" {
+  name_prefix = "app_lcfg"
+
+  image_id                    = "${data.aws_ami.appserver.id}"
+  instance_type               = var.appserver_instance_type
+  key_name                    = aws_key_pair.app_key.key_name
+  security_groups             = [aws_security_group.application_sg.id]
+  #associate_public_ip_address = true
+
+  root_block_device {
+    volume_size           = 25
+    volume_type           = "standard"
+    delete_on_termination = true
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
