@@ -114,7 +114,7 @@ resource "aws_lb" "app_lb" {
   internal = false
   load_balancer_type = "application"
   security_groups = [aws_security_group.alb_http.id]
-  subnets = [aws_subnet.web-subnet-1.id, aws_subnet.web-subnet-1.id]
+  subnets = [aws_subnet.web-subnet-1.id, aws_subnet.web-subnet-2.id]
 }
 
 # Web - ALB Security Group
@@ -192,23 +192,24 @@ resource "aws_security_group" "web_instance_sg" {
   }
 }
 
-# Web - Launch Template
-resource "aws_launch_template" "web_launch_template" {
-  name_prefix   = "web-launch-template"
-  #Image id should not be hardcoded
-  image_id      = "ami-074cce78125f09d61"
-  instance_type = "t2.micro"
-  key_name = aws_key_pair.rafael_key.id
-}
-
 ###This key must be encrypted
 resource "aws_key_pair" "rafael_key" {
   key_name   = "rafael_key"
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEb5x7YXs73HpA5Keyo1E/qRbzL98jR8knONXmh8yEdv Rafael Rojas big-bertha"
 }
 
+resource "aws_launch_template" "web_launch_template" {
+  name_prefix   = "web-launch-template"
+  #Image id should not be hardcoded
+  image_id      = "ami-074cce78125f09d61"
+  instance_type = "t2.micro"
+  key_name = aws_key_pair.rafael_key.id
+  user_data = "${base64encode("scripts/install-apache.sh")}"
+}
+
 # Web - Auto Scaling Group
 resource "aws_autoscaling_group" "web_asg" {
+  name               = "web_asg"
   desired_capacity   = 1
   max_size           = 1
   min_size           = 1
