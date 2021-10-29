@@ -180,6 +180,15 @@ resource "aws_security_group" "web_instance_sg" {
     security_groups = [aws_security_group.alb_http.id]
   }
 
+  #For ssh into the instance
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+
   egress {
     from_port       = 0
     to_port         = 0
@@ -204,6 +213,8 @@ resource "aws_launch_template" "web_launch_template" {
   image_id      = "ami-074cce78125f09d61"
   instance_type = "t2.micro"
   key_name = aws_key_pair.rafael_key.id
+  vpc_security_group_ids = [ aws_security_group.alb_http.id, aws_security_group.web_instance_sg.id]
+  associate_public_ip_address = false
   user_data = "${base64encode("scripts/install-apache.sh")}"
 }
 
@@ -220,4 +231,61 @@ resource "aws_autoscaling_group" "web_asg" {
     id      = aws_launch_template.web_launch_template.id
     version = "$Latest"
   }
+}
+
+# Create Bastion Elastic IP
+resource "aws_eip" "app-bastion-eip" {
+  vpc = true
+  tags = {
+    Name        = "app-bastion-eip"
+  }
+}
+
+
+# Define the security group for the Bastion
+resource "aws_security_group" "app-bastion-sg" {
+  name        = "app-bastion-sg"
+  description = "Access to Bastion Server"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    protocol    = -1
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  vpc_id =  aws_vpc.app_vpc.id
+
+  tags = {
+    Name        = "app-bastion-sg"
+  }
+}
+
+
+
+# Create EC2 Instance for Windows Bastion Server
+resource "aws_instance" "app-bastion-host" {
+  ami                         = "ami-074cce78125f09d61"
+  instance_type               = "t2.micro"
+  key_name                    = aws_key_pair.rafael_key.id
+  subnet_id                   = aws_subnet.web-subnet-1.id
+  vpc_security_group_ids      = [ aws_security_group.app-bastion-sg.id, aws_security_group.web_instance_sg.id ]
+  associate_public_ip_address = true
+  source_dest_check           = false
+  tags = {
+    Name        = "app-bastion"
+  }
+}
+
+# Associate Test Bastion Elastic IP
+resource "aws_eip_association" "app-bastion-eip-association" {
+  instance_id   = aws_instance.app-bastion-host.id
+  allocation_id = aws_eip.app-bastion-eip.id
 }
