@@ -180,3 +180,38 @@ resource "aws_lb_target_group" "web_target_group" {
     protocol = "HTTP"
   }
 }
+
+
+# Web - EC2 Instance Security Group
+resource "aws_security_group" "web_instance_sg" {
+  name        = "web-server-security-group"
+  description = "Allowing requests to the web servers"
+  vpc_id = aws_vpc.app_vpc.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    security_groups = [aws_security_group.alb_http.id]
+  }
+
+  #For ssh into the instance
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "web-server-security-group"
+  }
+}
