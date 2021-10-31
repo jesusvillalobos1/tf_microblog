@@ -120,3 +120,37 @@ resource "aws_route_table_association" "web_net_assoc2" {
   subnet_id      = aws_subnet.web-subnet-2.id
   route_table_id = aws_route_table.web-rt.id
 }
+
+# Web - Application Load Balancer
+resource "aws_lb" "app_lb" {
+  name = "app-lb"
+  internal = false
+  load_balancer_type = "application"
+  security_groups = [aws_security_group.alb_http.id]
+  subnets = [aws_subnet.web-subnet-1.id, aws_subnet.web-subnet-2.id]
+}
+
+# Web - ALB Security Group
+resource "aws_security_group" "alb_http" {
+  name        = "alb-security-group"
+  description = "Allowing HTTP requests to the application load balancer"
+  vpc_id = aws_vpc.app_vpc.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "alb-security-group"
+  }
+}
