@@ -215,3 +215,37 @@ resource "aws_security_group" "web_instance_sg" {
     Name = "web-server-security-group"
   }
 }
+
+###This key must be encrypted
+resource "aws_key_pair" "jesus_key" {
+  key_name   = "jesus_key"
+  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEb5x7YXs73HpA5Keyo1E/qRbzL98jR8knONXmh8yEdv Rafael Rojas big-berthassh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxMrES7uGK1edBIVtF+ODt3/g25ZFXlnV6TcVAUXgVQU9a47PgX0bZZlW9nUGiXwgiJa7OnJkicjCBd6o52R/nDsJK0gH7NJQAcTSlNAy7H0Lk48TC/D1HfRuADvo4Ys2uvcjmU/HdcsZf6LO/3Zg0QXkfv2Uc0lwjCfdr1idkRD5LBnYVPGAwSxmohqEbkIef5y+EFRziqAObEwqzWbaA9GBXj9ouUXiJbdy/0p7nPYf5UGk4yEjcT5EwiuYhfDzyElzCLmt5wvgLKSll/BhWVaw971w41y7ytQa9vSXOIM4HjaEm9jUc8+Z8ERIh6ObKMzXeHcI0n0GwwWe047t7 jarvis@Jarvis"
+}
+
+resource "aws_launch_template" "web_launch_template" {
+  name_prefix   = "web-launch-template-"
+  #Image id should not be hardcoded
+  image_id      = "ami-074cce78125f09d61"
+  instance_type = "t2.micro"
+  key_name = aws_key_pair.jesus_key.id
+  vpc_security_group_ids = [ aws_security_group.alb_http.id, aws_security_group.web_instance_sg.id]
+  network_interfaces {
+    associate_public_ip_address = false
+  }
+  user_data = filebase64("scripts/install-apache.sh")
+}
+
+# Web - Auto Scaling Group
+resource "aws_autoscaling_group" "web_asg" {
+  name               = "web_asg"
+  desired_capacity   = 1
+  max_size           = 1
+  min_size           = 1
+  target_group_arns = [aws_lb_target_group.web_target_group.arn]
+  vpc_zone_identifier = [aws_subnet.web-subnet-1.id, aws_subnet.web-subnet-1.id]
+
+  launch_template {
+    id      = aws_launch_template.web_launch_template.id
+    version = "$Latest"
+  }
+}
