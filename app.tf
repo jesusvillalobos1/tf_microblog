@@ -120,3 +120,98 @@ resource "aws_route_table_association" "web_net_assoc2" {
   subnet_id      = aws_subnet.web-subnet-2.id
   route_table_id = aws_route_table.web-rt.id
 }
+
+# Web - Application Load Balancer
+resource "aws_lb" "app_lb" {
+  name = "app-lb"
+  internal = false
+  load_balancer_type = "application"
+  security_groups = [aws_security_group.alb_http.id]
+  subnets = [aws_subnet.web-subnet-1.id, aws_subnet.web-subnet-2.id]
+}
+
+# Web - ALB Security Group
+resource "aws_security_group" "alb_http" {
+  name        = "alb-security-group"
+  description = "Allowing HTTP requests to the application load balancer"
+  vpc_id = aws_vpc.app_vpc.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "alb-security-group"
+  }
+}
+
+
+# Web - Listener
+resource "aws_lb_listener" "web_listener" {
+  load_balancer_arn = aws_lb.app_lb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.web_target_group.arn
+  }
+}
+
+# Web - Target Group
+resource "aws_lb_target_group" "web_target_group" {
+  name     = "web-target-group"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.app_vpc.id
+
+  health_check {
+    port     = 80
+    protocol = "HTTP"
+  }
+}
+
+
+# Web - EC2 Instance Security Group
+resource "aws_security_group" "web_instance_sg" {
+  name        = "web-server-security-group"
+  description = "Allowing requests to the web servers"
+  vpc_id = aws_vpc.app_vpc.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    security_groups = [aws_security_group.alb_http.id]
+  }
+
+  #For ssh into the instance
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "web-server-security-group"
+  }
+}
