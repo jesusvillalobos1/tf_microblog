@@ -73,6 +73,16 @@ resource "aws_subnet" "database-subnet-2" {
   }
 }
 
+resource "aws_db_subnet_group" "app-rds-sng" {
+  name       = "app-rds-sng"
+  subnet_ids = [aws_subnet.application-subnet-1.id, aws_subnet.application-subnet-2.id, aws_subnet.database-subnet-1.id]
+
+  tags = {
+    Name = "app-rds-sng"
+  }
+}
+
+
 # Create Internet Gateway
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.app_vpc.id
@@ -208,14 +218,18 @@ resource "aws_key_pair" "rafael_key" {
 }
 
 resource "aws_launch_template" "web_launch_template" {
-  name_prefix   = "web-launch-template"
+  name_prefix   = "web-launch-template-"
   #Image id should not be hardcoded
   image_id      = "ami-074cce78125f09d61"
   instance_type = "t2.micro"
   key_name = aws_key_pair.rafael_key.id
   vpc_security_group_ids = [ aws_security_group.alb_http.id, aws_security_group.web_instance_sg.id]
-  associate_public_ip_address = false
-  user_data = "${base64encode("scripts/install-apache.sh")}"
+  network_interfaces {
+    associate_public_ip_address = false
+  }
+  #associate_public_ip_address = false
+  #user_data = "${base64encode("scripts/install-apache.sh")}"
+  user_data = filebase64("scripts/install-apache.sh")
 }
 
 # Web - Auto Scaling Group
@@ -288,4 +302,60 @@ resource "aws_instance" "app-bastion-host" {
 resource "aws_eip_association" "app-bastion-eip-association" {
   instance_id   = aws_instance.app-bastion-host.id
   allocation_id = aws_eip.app-bastion-eip.id
+}
+
+#####DB instance setup
+resource "aws_security_group" "dbserver_sg" {
+  name        = "dbserver_sg"
+  description = "Allows connection for Database servers"
+  vpc_id      = aws_vpc.app_vpc.id
+
+  #SSH
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  #MYSQL
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  #ALL
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+#This shouldn't be hardcoded
+resource "aws_default_subnet" "default_us-east-2a" {
+  availability_zone = "us-east-2a"
+
+  tags = {
+    Name = "Default subnet for us-east-2a"
+  }
+}
+
+resource "aws_db_instance" "appserver-db" {
+  allocated_storage      = 20
+  engine                 = "mysql"
+  engine_version         = "8.023"
+  instance_class         = db.t2.micro
+  name                   = "app-main-db"
+  identifier             = "app-database"
+  #this shouldn't be hardcoded like this
+  username               = dbadmin
+  password               = xTkjwje6UM3v
+  db_subnet_group_name   = aws_db_subnet_group.app-rds-sng.id
+  vpc_security_group_ids = [aws_security_group.dbserver_sg.id]
+  skip_final_snapshot    = true
+  publicly_accessible    = false
 }
