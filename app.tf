@@ -218,28 +218,31 @@ resource "aws_key_pair" "rafael_key" {
 }
 
 resource "aws_launch_template" "web_launch_template" {
-  name_prefix   = "web-launch-template-"
+  name_prefix   = "web-launch-template"
   #Image id should not be hardcoded
   image_id      = "ami-074cce78125f09d61"
   instance_type = "t2.micro"
   key_name = aws_key_pair.rafael_key.id
-  vpc_security_group_ids = [ aws_security_group.alb_http.id, aws_security_group.web_instance_sg.id]
+  
   network_interfaces {
     associate_public_ip_address = false
+    security_groups = [ aws_security_group.alb_http.id, aws_security_group.web_instance_sg.id ]
   }
-  #associate_public_ip_address = false
-  #user_data = "${base64encode("scripts/install-apache.sh")}"
   user_data = filebase64("scripts/install-apache.sh")
+  lifecycle {
+    create_before_destroy = true
+  }
+
 }
 
 # Web - Auto Scaling Group
 resource "aws_autoscaling_group" "web_asg" {
   name               = "web_asg"
-  desired_capacity   = 1
-  max_size           = 1
+  desired_capacity   = 2
+  max_size           = 3
   min_size           = 1
   target_group_arns = [aws_lb_target_group.web_target_group.arn]
-  vpc_zone_identifier = [aws_subnet.web-subnet-1.id, aws_subnet.web-subnet-1.id]
+  vpc_zone_identifier = [aws_subnet.web-subnet-1.id, aws_subnet.web-subnet-2.id]
 
   launch_template {
     id      = aws_launch_template.web_launch_template.id
@@ -284,7 +287,7 @@ resource "aws_security_group" "app-bastion-sg" {
 
 
 
-# Create EC2 Instance for Windows Bastion Server
+# Create EC2 Instance for Bastion Server
 resource "aws_instance" "app-bastion-host" {
   ami                         = "ami-074cce78125f09d61"
   instance_type               = "t2.micro"
@@ -347,13 +350,13 @@ resource "aws_default_subnet" "default_us-east-2a" {
 resource "aws_db_instance" "appserver-db" {
   allocated_storage      = 20
   engine                 = "mysql"
-  engine_version         = "8.023"
-  instance_class         = db.t2.micro
-  name                   = "app-main-db"
+  engine_version         = "8.0.23"
+  instance_class         = "db.t2.micro"
+  name                   = "appmaindb"
   identifier             = "app-database"
   #this shouldn't be hardcoded like this
-  username               = dbadmin
-  password               = xTkjwje6UM3v
+  username               = "dbadmin"
+  password               = "xTkjwje6UM3v"
   db_subnet_group_name   = aws_db_subnet_group.app-rds-sng.id
   vpc_security_group_ids = [aws_security_group.dbserver_sg.id]
   skip_final_snapshot    = true
