@@ -237,18 +237,22 @@ resource "aws_launch_template" "web_launch_template" {
   image_id      = "ami-074cce78125f09d61"
   instance_type = "t2.micro"
   key_name = aws_key_pair.jesus_key.id
-  vpc_security_group_ids = [ aws_security_group.alb_http.id, aws_security_group.web_instance_sg.id]
   network_interfaces {
     associate_public_ip_address = false
+    security_groups = [ aws_security_group.alb_http.id, aws_security_group.web_instance_sg.id ]
   }
   user_data = filebase64("scripts/install-apache.sh")
+  lifecycle {
+    create_before_destroy = true
+  }
+
 }
 
 # Web - Auto Scaling Group
 resource "aws_autoscaling_group" "web_asg" {
   name               = "web_asg"
-  desired_capacity   = 1
-  max_size           = 1
+  desired_capacity   = 2
+  max_size           = 3
   min_size           = 1
   target_group_arns = [aws_lb_target_group.web_target_group.arn]
   vpc_zone_identifier = [aws_subnet.web-subnet-1.id, aws_subnet.web-subnet-1.id]
