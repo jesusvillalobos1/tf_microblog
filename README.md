@@ -11,3 +11,8 @@ Big project to integrate all DevOps toolset
    * Fixed database instance naming, mysql version and other typos.
    * ASG built to minimal 2 instances.
    * Launch configuration fixed.
+* 30/11. Finished app infrastructure. Currently on one big file with hardcoded values.
+   * Load balancer works.
+   * Load distributed between two instances.
+   * bastion works
+   * connection from app servers to database endpoint works.   
