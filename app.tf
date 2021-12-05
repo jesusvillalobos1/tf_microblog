@@ -119,16 +119,16 @@ resource "aws_route_table_association" "b" {
 
 
 
-# Create Web Subnet association with Web route table
-resource "aws_route_table_association" "web_net_assoc1" {
-  subnet_id      = aws_subnet.web-subnet-1.id
-  route_table_id = aws_route_table.web-rt.id
-}
+# # Create Web Subnet association with Web route table
+# resource "aws_route_table_association" "web_net_assoc1" {
+#   subnet_id      = aws_subnet.web-subnet-1.id
+#   route_table_id = aws_route_table.web-rt.id
+# }
  
-resource "aws_route_table_association" "web_net_assoc2" {
-  subnet_id      = aws_subnet.web-subnet-2.id
-  route_table_id = aws_route_table.web-rt.id
-}
+# resource "aws_route_table_association" "web_net_assoc2" {
+#   subnet_id      = aws_subnet.web-subnet-2.id
+#   route_table_id = aws_route_table.web-rt.id
+# }
 
 # Web - Application Load Balancer
 resource "aws_lb" "app_lb" {
@@ -209,7 +209,7 @@ resource "aws_security_group" "web_instance_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["10.0.0.0/16"]
   }
 
 
@@ -228,7 +228,7 @@ resource "aws_security_group" "web_instance_sg" {
 ###This key must be encrypted
 resource "aws_key_pair" "jesus_key" {
   key_name   = "jesus_key"
-  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEb5x7YXs73HpA5Keyo1E/qRbzL98jR8knONXmh8yEdv Rafael Rojas big-berthassh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxMrES7uGK1edBIVtF+ODt3/g25ZFXlnV6TcVAUXgVQU9a47PgX0bZZlW9nUGiXwgiJa7OnJkicjCBd6o52R/nDsJK0gH7NJQAcTSlNAy7H0Lk48TC/D1HfRuADvo4Ys2uvcjmU/HdcsZf6LO/3Zg0QXkfv2Uc0lwjCfdr1idkRD5LBnYVPGAwSxmohqEbkIef5y+EFRziqAObEwqzWbaA9GBXj9ouUXiJbdy/0p7nPYf5UGk4yEjcT5EwiuYhfDzyElzCLmt5wvgLKSll/BhWVaw971w41y7ytQa9vSXOIM4HjaEm9jUc8+Z8ERIh6ObKMzXeHcI0n0GwwWe047t7 jarvis@Jarvis"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxMrES7uGK1edBIVtF+ODt3/g25ZFXlnV6TcVAUXgVQU9a47PgX0bZZlW9nUGiXwgiJa7OnJkicjCBd6o52R/nDsJK0gH7NJQAcTSlNAy7H0Lk48TC/D1HfRuADvo4Ys2uvcjmU/HdcsZf6LO/3Zg0QXkfv2Uc0lwjCfdr1idkRD5LBnYVPGAwSxmohqEbkIef5y+EFRziqAObEwqzWbaA9GBXj9ouUXiJbdy/0p7nPYf5UGk4yEjcT5EwiuYhfDzyElzCLmt5wvgLKSll/BhWVaw971w41y7ytQa9vSXOIM4HjaEm9jUc8+Z8ERIh6ObKMzXeHcI0n0GwwWe047t7 jarvis@Jarvis"
 }
 
 resource "aws_launch_template" "web_launch_template" {
@@ -238,7 +238,7 @@ resource "aws_launch_template" "web_launch_template" {
   instance_type = "t2.micro"
   key_name = aws_key_pair.jesus_key.id
   network_interfaces {
-    associate_public_ip_address = false
+    associate_public_ip_address = true
     security_groups = [ aws_security_group.alb_http.id, aws_security_group.web_instance_sg.id ]
   }
   user_data = filebase64("scripts/install-apache.sh")
@@ -255,7 +255,7 @@ resource "aws_autoscaling_group" "web_asg" {
   max_size           = 3
   min_size           = 1
   target_group_arns = [aws_lb_target_group.web_target_group.arn]
-  vpc_zone_identifier = [aws_subnet.web-subnet-1.id, aws_subnet.web-subnet-1.id]
+  vpc_zone_identifier = [aws_subnet.web-subnet-1.id, aws_subnet.web-subnet-2.id]
 
   launch_template {
     id      = aws_launch_template.web_launch_template.id
@@ -351,26 +351,26 @@ resource "aws_security_group" "dbserver_sg" {
   }
 }
 
-#This shouldn't be hardcoded
-resource "aws_default_subnet" "default_us-east-2a" {
-  availability_zone = "us-east-2a"
+# #This shouldn't be hardcoded
+# resource "aws_default_subnet" "default_us-east-2a" {
+#   availability_zone = "us-east-2a"
 
-  tags = {
-    Name = "Default subnet for us-east-2a"
-  }
-}
+#   tags = {
+#     Name = "Default subnet for us-east-2a"
+#   }
+# }
 
 resource "aws_db_instance" "appserver-db" {
   allocated_storage      = 20
   engine                 = "mysql"
-  engine_version         = "8.023"
+  engine_version         = "8.0.23"
   instance_class         = "db.t2.micro"
-  name                   = "app-main-db"
+  name                   = "appmaindb"
   identifier             = "app-database"
   #this shouldn't be hardcoded like this
   username               = "dbadmin"
   password               = "xTkjwje6UM3v"
-  db_subnet_group_name   = "aws_db_subnet_group.app-rds-sng.id"
+  db_subnet_group_name   = aws_db_subnet_group.app-rds-sng.id
   vpc_security_group_ids = [aws_security_group.dbserver_sg.id]
   skip_final_snapshot    = true
   publicly_accessible    = false
