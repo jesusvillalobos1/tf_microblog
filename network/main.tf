@@ -1,3 +1,15 @@
+# Use terraform cloud as a backend
+terraform {
+  backend "remote" {
+    hostname = "app.terraform.io"
+    organization = "big-app"
+
+    workspaces {
+      name = "network"
+    }
+  }
+}
+
 # Create VPC
 resource "aws_vpc" "app_vpc" {
   cidr_block = var.vpc_cidr
@@ -22,7 +34,7 @@ resource "aws_subnet" "pub_sub1" {
 # Create Public Subnet2
 resource "aws_subnet" "pub_sub2" {
   vpc_id                  = aws_vpc.app_vpc.id
-  cidr_block              = var.pub_sub1_cidr
+  cidr_block              = var.pub_sub2_cidr
   availability_zone       = "us-east-2b"
   map_public_ip_on_launch = true
   tags = {
@@ -38,7 +50,7 @@ resource "aws_subnet" "prv_sub1" {
   map_public_ip_on_launch = false
 
   tags = {
-    Name = "Application-1a"
+    Name = "app-1a"
   }
 }
 
