@@ -5,7 +5,7 @@ terraform {
     organization = "big-app"
 
     workspaces {
-      name = "network"
+      name = "big-project"
     }
   }
 }
