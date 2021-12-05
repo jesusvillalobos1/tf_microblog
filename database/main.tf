@@ -1,3 +1,15 @@
+# Use terraform cloud as a backend  UNCOMMENT UNTIL PROOF OF CONCEPT IS DONE
+#terraform {
+#  backend "remote" {
+#    hostname = "app.terraform.io"
+#    organization = "big-app"
+
+#    workspaces {
+#      name = "big-project"
+#    }
+#  }
+#}
+
 #####DB instance setup
 resource "aws_security_group" "dbserver_sg" {
   name        = "dbserver_sg"
@@ -32,15 +44,15 @@ resource "aws_default_subnet" "default_us-east-2a" {
 
 resource "aws_db_instance" "appserver-db" {
   allocated_storage      = 20
-  engine                 = "mysql"
-  engine_version         = "8.0.23"
-  instance_class         = "db.t2.micro"
-  name                   = "appmaindb"
-  identifier             = "app-database"
+  engine                 = var.db_engine
+  engine_version         = var.db_engine_version
+  instance_class         = var.db_instance_type
+  name                   = var.db_instance_name
+  identifier             = var.db_identifier
   #this shouldn't be hardcoded like this
-  username               = "dbadmin"
-  password               = "xTkjwje6UM3v"
-  db_subnet_group_name   = aws_db_subnet_group.app-rds-sng.id
+  username               = var.db_user
+  password               = var.db_password
+  db_subnet_group_name   = data.terraform_remote_state.network.outputs.app-rds-sng
   vpc_security_group_ids = [aws_security_group.dbserver_sg.id]
   skip_final_snapshot    = true
   publicly_accessible    = false
