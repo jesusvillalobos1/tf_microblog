@@ -39,3 +39,7 @@ output "igw" {
 output "pub_sub1_rt" {
   value = aws_route_table.pub_sub1_rt.id
 }
+
+output "elb_sg" {
+  value =aws_security_group.elb_sg.id
+}
