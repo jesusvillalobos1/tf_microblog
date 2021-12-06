@@ -11,3 +11,4 @@
    * Load distributed between two instances.
    * bastion works
    * connection from app servers to database endpoint works.   
+* 05/12. Adding modules 

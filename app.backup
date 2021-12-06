@@ -1,0 +1,150 @@
+
+
+# Create security group for webserver
+resource "aws_security_group" "webserver_sg" {
+  name        = "web-server-security-group"
+  description = "Allowing requests to the web servers"
+  vpc_id = aws_vpc.app_vpc.id
+
+ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    description = "HTTP"
+    cidr_blocks = ["0.0.0.0/0"]
+
+ }
+
+ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    description = "HTTP"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+tags = {
+    Name = "web-server-security-group"
+  }
+}
+
+
+
+#Create Launch config
+resource "aws_launch_configuration" "webserver-launch-config" {
+  name_prefix   = "webserver-launch-config"
+  #Image id should not be hardcoded
+  image_id      = "ami-074cce78125f09d61"
+  instance_type = "t2.micro"
+  key_name = aws_key_pair.rafael_key.id
+  security_groups = [aws_security_group.webserver_sg.id]
+  lifecycle {
+    create_before_destroy = true
+  }
+  user_data = filebase64("scripts/install-apache.sh")
+}
+
+# Create Auto Scaling Group
+resource "aws_autoscaling_group" "web_asg" {
+  name		     = "Demo-ASG-tf"
+  desired_capacity   = 2
+  max_size           = 3
+  min_size           = 1
+  force_delete       = true
+  #depends_on 	     = ["aws_lb.app_lb"]
+  target_group_arns  =  [aws_lb_target_group.web-tg.arn]
+  health_check_type  = "EC2"
+  launch_configuration = aws_launch_configuration.webserver-launch-config.name
+  vpc_zone_identifier = [aws_subnet.prv_sub1.id, aws_subnet.prv_sub2.id]
+} 
+
+# Create Target group
+resource "aws_lb_target_group" "web-tg" {
+  name     = "web-target-group"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.app_vpc.id
+  health_check {
+    port                = 80
+    protocol            = "HTTP"
+  }
+}
+
+# Create ALB
+resource "aws_lb" "app_lb" {
+   name              = "app-lb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.elb_sg.id]
+  subnets            = [aws_subnet.pub_sub1.id,aws_subnet.pub_sub2.id]
+}
+
+# Create ALB Listener 
+resource "aws_lb_listener" "web_listener" {
+  load_balancer_arn = aws_lb.app_lb.arn
+  port              = "80"
+  protocol          = "HTTP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.web-tg.arn
+  }
+}
+
+
+
+
+
+#####DB instance setup
+resource "aws_security_group" "dbserver_sg" {
+  name        = "dbserver_sg"
+  description = "Allows connection for Database servers"
+  vpc_id      = aws_vpc.app_vpc.id
+
+  #MYSQL
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  #ALL
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+#This shouldn't be hardcoded
+resource "aws_default_subnet" "default_us-east-2a" {
+  availability_zone = "us-east-2a"
+
+  tags = {
+    Name = "Default subnet for us-east-2a"
+  }
+}
+
+resource "aws_db_instance" "appserver-db" {
+  allocated_storage      = 20
+  engine                 = "mysql"
+  engine_version         = "8.0.23"
+  instance_class         = "db.t2.micro"
+  name                   = "appmaindb"
+  identifier             = "app-database"
+  #this shouldn't be hardcoded like this
+  username               = "dbadmin"
+  password               = "xTkjwje6UM3v"
+  db_subnet_group_name   = aws_db_subnet_group.app-rds-sng.id
+  vpc_security_group_ids = [aws_security_group.dbserver_sg.id]
+  skip_final_snapshot    = true
+  publicly_accessible    = false
+}
