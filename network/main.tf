@@ -69,13 +69,8 @@ resource "aws_subnet" "prv_sub2" {
 #Create Database Private Subnet
 resource "aws_subnet" "database-subnet-1" {
   vpc_id            = aws_vpc.app_vpc.id
-<<<<<<< HEAD
   cidr_block        = var.db_sub1_cidr
-=======
-  cidr_block        = "10.0.5.0/24"
->>>>>>> main
   availability_zone = "us-east-2a"
-
   tags = {
     Name = "Database-1a"
   }
@@ -83,13 +78,8 @@ resource "aws_subnet" "database-subnet-1" {
 
 resource "aws_subnet" "database-subnet-2" {
   vpc_id            = aws_vpc.app_vpc.id
-<<<<<<< HEAD
   cidr_block        = var.db_sub2_cidr
-=======
-  cidr_block        = "10.0.6.0/24"
->>>>>>> main
   availability_zone = "us-east-2b"
-
   tags = {
     Name = "Database-2b"
   }
@@ -142,18 +132,10 @@ resource "aws_route_table_association" "internet_for_pub_sub2" {
 # Create EIP for NAT GW1
   resource "aws_eip" "eip_natgw1" {
   vpc = true    
-<<<<<<< HEAD
-=======
-  #count = "1"
->>>>>>> main
 }
 
 # Create NAT gateway1
 resource "aws_nat_gateway" "natgateway_1" {
-<<<<<<< HEAD
-=======
-  #count         = "1"
->>>>>>> main
   allocation_id = aws_eip.eip_natgw1.id
   subnet_id     = aws_subnet.pub_sub1.id
 }
@@ -183,20 +165,12 @@ resource "aws_route_table" "prv_sub1_rt" {
 
 # Create route table association betn prv sub1 & NAT GW1
 resource "aws_route_table_association" "pri_sub1_to_natgw1" {
-<<<<<<< HEAD
-=======
-  #count          = "1"
->>>>>>> main
   route_table_id = aws_route_table.prv_sub1_rt.id
   subnet_id      = aws_subnet.prv_sub1.id
 }
 
 # Create private route table for prv sub2
 resource "aws_route_table" "prv_sub2_rt" {
-<<<<<<< HEAD
-=======
-  #count  = "1"
->>>>>>> main
   vpc_id =  aws_vpc.app_vpc.id
   route {
     cidr_block     = "0.0.0.0/0"
@@ -209,7 +183,6 @@ resource "aws_route_table_association" "pri_sub2_to_natgw1" {
   count          = "1"
   route_table_id = aws_route_table.prv_sub2_rt.id
   subnet_id      = aws_subnet.prv_sub2.id
-<<<<<<< HEAD
 }
 
 # Create security group for load balancer
@@ -238,7 +211,3 @@ egress {
     Name = "alb-security-group"
   }
 }
-
-=======
-}
->>>>>>> main
