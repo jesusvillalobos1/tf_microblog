@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Use terraform cloud as a backend  UNCOMMENT UNTIL PROOF OF CONCEPT IS DONE
 #terraform {
 #  backend "remote" {
@@ -14,11 +14,6 @@
 # Create VPC
 resource "aws_vpc" "app_vpc" {
   cidr_block = var.vpc_cidr
-=======
-# Create VPC
-resource "aws_vpc" "app_vpc" {
-  cidr_block = "10.0.0.0/16"
->>>>>>> main
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
@@ -29,11 +24,7 @@ resource "aws_vpc" "app_vpc" {
 # Create Public Subnet1
 resource "aws_subnet" "pub_sub1" {
   vpc_id                  = aws_vpc.app_vpc.id
-<<<<<<< HEAD
   cidr_block              = var.pub_sub1_cidr
-=======
-  cidr_block              = "10.0.1.0/24"
->>>>>>> main
   availability_zone       = "us-east-2a"
   map_public_ip_on_launch = true
   tags = {
@@ -44,11 +35,7 @@ resource "aws_subnet" "pub_sub1" {
 # Create Public Subnet2
 resource "aws_subnet" "pub_sub2" {
   vpc_id                  = aws_vpc.app_vpc.id
-<<<<<<< HEAD
   cidr_block              = var.pub_sub2_cidr
-=======
-  cidr_block              = "10.0.2.0/24"
->>>>>>> main
   availability_zone       = "us-east-2b"
   map_public_ip_on_launch = true
   tags = {
@@ -59,31 +46,18 @@ resource "aws_subnet" "pub_sub2" {
 # Create Private Subnet1
 resource "aws_subnet" "prv_sub1" {
   vpc_id                  = aws_vpc.app_vpc.id
-<<<<<<< HEAD
   cidr_block              = var.prv_sub1_cidr
-=======
-  cidr_block              = "10.0.3.0/24"
->>>>>>> main
   availability_zone       = "us-east-2a"
   map_public_ip_on_launch = false
-
   tags = {
-<<<<<<< HEAD
     Name = "app-1a"
-=======
-    Name = "Application-1a"
->>>>>>> main
   }
 }
 
 # Create Private Subnet2
 resource "aws_subnet" "prv_sub2" {
   vpc_id                  = aws_vpc.app_vpc.id
-<<<<<<< HEAD
   cidr_block              = var.prv_sub2_cidr
-=======
-  cidr_block              = "10.0.4.0/24"
->>>>>>> main
   availability_zone       = "us-east-2b"
   map_public_ip_on_launch = false
 
