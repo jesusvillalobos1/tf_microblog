@@ -1,6 +1,24 @@
+<<<<<<< HEAD
+# Use terraform cloud as a backend  UNCOMMENT UNTIL PROOF OF CONCEPT IS DONE
+#terraform {
+#  backend "remote" {
+#    hostname = "app.terraform.io"
+#    organization = "big-app"
+
+#    workspaces {
+#      name = "big-project"
+#    }
+#  }
+#}
+
+# Create VPC
+resource "aws_vpc" "app_vpc" {
+  cidr_block = var.vpc_cidr
+=======
 # Create VPC
 resource "aws_vpc" "app_vpc" {
   cidr_block = "10.0.0.0/16"
+>>>>>>> main
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
@@ -11,7 +29,11 @@ resource "aws_vpc" "app_vpc" {
 # Create Public Subnet1
 resource "aws_subnet" "pub_sub1" {
   vpc_id                  = aws_vpc.app_vpc.id
+<<<<<<< HEAD
+  cidr_block              = var.pub_sub1_cidr
+=======
   cidr_block              = "10.0.1.0/24"
+>>>>>>> main
   availability_zone       = "us-east-2a"
   map_public_ip_on_launch = true
   tags = {
@@ -22,7 +44,11 @@ resource "aws_subnet" "pub_sub1" {
 # Create Public Subnet2
 resource "aws_subnet" "pub_sub2" {
   vpc_id                  = aws_vpc.app_vpc.id
+<<<<<<< HEAD
+  cidr_block              = var.pub_sub2_cidr
+=======
   cidr_block              = "10.0.2.0/24"
+>>>>>>> main
   availability_zone       = "us-east-2b"
   map_public_ip_on_launch = true
   tags = {
@@ -33,19 +59,31 @@ resource "aws_subnet" "pub_sub2" {
 # Create Private Subnet1
 resource "aws_subnet" "prv_sub1" {
   vpc_id                  = aws_vpc.app_vpc.id
+<<<<<<< HEAD
+  cidr_block              = var.prv_sub1_cidr
+=======
   cidr_block              = "10.0.3.0/24"
+>>>>>>> main
   availability_zone       = "us-east-2a"
   map_public_ip_on_launch = false
 
   tags = {
+<<<<<<< HEAD
+    Name = "app-1a"
+=======
     Name = "Application-1a"
+>>>>>>> main
   }
 }
 
 # Create Private Subnet2
 resource "aws_subnet" "prv_sub2" {
   vpc_id                  = aws_vpc.app_vpc.id
+<<<<<<< HEAD
+  cidr_block              = var.prv_sub2_cidr
+=======
   cidr_block              = "10.0.4.0/24"
+>>>>>>> main
   availability_zone       = "us-east-2b"
   map_public_ip_on_launch = false
 
@@ -57,7 +95,11 @@ resource "aws_subnet" "prv_sub2" {
 #Create Database Private Subnet
 resource "aws_subnet" "database-subnet-1" {
   vpc_id            = aws_vpc.app_vpc.id
+<<<<<<< HEAD
+  cidr_block        = var.db_sub1_cidr
+=======
   cidr_block        = "10.0.5.0/24"
+>>>>>>> main
   availability_zone = "us-east-2a"
 
   tags = {
@@ -67,7 +109,11 @@ resource "aws_subnet" "database-subnet-1" {
 
 resource "aws_subnet" "database-subnet-2" {
   vpc_id            = aws_vpc.app_vpc.id
+<<<<<<< HEAD
+  cidr_block        = var.db_sub2_cidr
+=======
   cidr_block        = "10.0.6.0/24"
+>>>>>>> main
   availability_zone = "us-east-2b"
 
   tags = {
@@ -122,12 +168,18 @@ resource "aws_route_table_association" "internet_for_pub_sub2" {
 # Create EIP for NAT GW1
   resource "aws_eip" "eip_natgw1" {
   vpc = true    
+<<<<<<< HEAD
+=======
   #count = "1"
+>>>>>>> main
 }
 
 # Create NAT gateway1
 resource "aws_nat_gateway" "natgateway_1" {
+<<<<<<< HEAD
+=======
   #count         = "1"
+>>>>>>> main
   allocation_id = aws_eip.eip_natgw1.id
   subnet_id     = aws_subnet.pub_sub1.id
 }
@@ -157,14 +209,20 @@ resource "aws_route_table" "prv_sub1_rt" {
 
 # Create route table association betn prv sub1 & NAT GW1
 resource "aws_route_table_association" "pri_sub1_to_natgw1" {
+<<<<<<< HEAD
+=======
   #count          = "1"
+>>>>>>> main
   route_table_id = aws_route_table.prv_sub1_rt.id
   subnet_id      = aws_subnet.prv_sub1.id
 }
 
 # Create private route table for prv sub2
 resource "aws_route_table" "prv_sub2_rt" {
+<<<<<<< HEAD
+=======
   #count  = "1"
+>>>>>>> main
   vpc_id =  aws_vpc.app_vpc.id
   route {
     cidr_block     = "0.0.0.0/0"
@@ -177,4 +235,36 @@ resource "aws_route_table_association" "pri_sub2_to_natgw1" {
   count          = "1"
   route_table_id = aws_route_table.prv_sub2_rt.id
   subnet_id      = aws_subnet.prv_sub2.id
+<<<<<<< HEAD
 }
+
+# Create security group for load balancer
+resource "aws_security_group" "elb_sg" {
+  name        = "alb-security-group"
+  description = "Allowing HTTP requests to the application load balancer"
+  vpc_id = aws_vpc.app_vpc.id
+
+ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    description = "HTTP"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+ 
+  tags = {
+    Name = "alb-security-group"
+  }
+}
+
+=======
+}
+>>>>>>> main
