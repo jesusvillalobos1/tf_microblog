@@ -7,6 +7,9 @@ How to use:
 
 
 * Install [Vagrant](https://www.vagrantup.com/downloads). 
+    * For Windows hosts only: because windows is *special*, you will need to install the vagrant VBox Guest plugin: `vagrant plugin install vagrant-vbguest`.
+
+
 * Clone this repo, go to this directory, run `vagrant up`.
 * test the repo using `vagrant ssh`.
 
