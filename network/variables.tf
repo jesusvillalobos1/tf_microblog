@@ -3,6 +3,16 @@ variable "aws_region" {
   default     = "us-east-2"
 }
 
+variable "project_name" {
+  description = "project name"
+  default     = "app"
+}
+
+variable "environment" {
+  description = "Environment variables"
+  default     = "dev"
+}
+
 variable "vpc_cidr" {
   description = "CIDR for the VPC"
   default     = "10.0.0.0/16"

@@ -21,11 +21,11 @@ output "prv_sub2" {
 }
 
 output "database-subnet-1" {
-   value = aws_subnet.database-subnet-1.id 
+  value = aws_subnet.database-subnet-1.id
 }
 
 output "database-subnet-2" {
-   value = aws_subnet.database-subnet-2.id 
+  value = aws_subnet.database-subnet-2.id
 }
 
 output "app-rds-sng" {
@@ -41,5 +41,5 @@ output "pub_sub1_rt" {
 }
 
 output "elb_sg" {
-  value =aws_security_group.elb_sg.id
+  value = aws_security_group.elb_sg.id
 }
