@@ -1,0 +1,94 @@
+---
+- hosts: all
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_become: yes
+
+  tasks:
+    - name: Update and upgrade apt packages
+      become: true
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400 #One day
+
+     #Set up passwordless sudo for deploy
+    - name: Make sure we have a 'wheel' group
+      become: yes
+      group:
+        name: wheel
+        state: present
+   
+    - name: Allow wheel group to have passwordless sudo
+      become: yes
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: "^%wheel"
+        line: "%wheel ALL=(ALL) NOPASSWD: ALL"
+        validate: "visudo -cf %s"
+
+    - name: Create a deploy user
+      become: yes
+      user:
+        name: deploy
+        password: Change666Me #Needs to be encrypted
+        groups: 
+        - sudo
+        - wheel
+        state: present
+        shell: /bin/bash       # Defaults to /bin/bash
+        createhome: yes        # Defaults to yes
+        home: /home/deploy  # Defaults to /home/<username>
+        
+    - name: Set up authorized keys
+      become: yes
+      authorized_key:
+        user: deploy
+        state: present
+        key: '{{ item }}'
+      with_file:
+        - '../../keys/ssh/id_rsa.pub' 
+
+    - name: Install required packages
+      apt:
+        pkg:
+          - mysql-server
+          - supervisor
+          - nginx
+          - git
+        state: latest
+        update_cache: true
+
+    - name: Run command tu setup postfix 
+      command: debconf-set-selections <<< "postfix postfix/mailname string bigproject.name"
+
+    - name: Run command tu setup postfix mailer type
+      command: debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
+
+    - name: Install postfix
+      apt:
+        pkg:
+          - postfix
+
+    - name: Example clone of a single branch
+      git:
+        repo: https://github.com/miguelgrinberg/microblog
+        dest: /tmp/microblog
+
+
+    - name: Setup microblog branch
+      args:
+        chdir: /tmp/microblog
+      command: git checkout v0.17
+
+    - name: Copy repo to /home/deploy
+      copy: remote_src=True src=/path/to/foo dest=/path/to/bar
+
+
+    - name: Setup python
+      become: yes
+      become_user: deploy
+      args:
+        chdir: /home/deploy/microblog
+      command: python3 -m venv venv; source venv/bin/activate; pip install -r requirements.txt; pip install gunicorn pymysql cryptography; echo "export FLASK_APP=microblog.py" >> ~/.profile
