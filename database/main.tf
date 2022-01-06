@@ -34,11 +34,11 @@ resource "aws_security_group" "dbserver_sg" {
 }
 
 #This shouldn't be hardcoded
-resource "aws_default_subnet" "default_us-east-2a" {
-  availability_zone = "us-east-2a"
+resource "aws_default_subnet" "default_us-west-2a" {
+  availability_zone = "us-west-2a"
 
   tags = {
-    Name = "Default subnet for us-east-2a"
+    Name = "Default subnet for us-west-2a"
   }
 }
 

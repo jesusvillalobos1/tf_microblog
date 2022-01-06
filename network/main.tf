@@ -26,7 +26,7 @@ resource "aws_vpc" "app_vpc" {
 resource "aws_subnet" "pub_sub1" {
   vpc_id                  = aws_vpc.app_vpc.id
   cidr_block              = var.pub_sub1_cidr
-  availability_zone       = "us-east-2a"
+  availability_zone       = "us-west-2a"
   map_public_ip_on_launch = true
   tags = {
     Name        = "${var.project_name}-pub_sub1"
@@ -38,7 +38,7 @@ resource "aws_subnet" "pub_sub1" {
 resource "aws_subnet" "pub_sub2" {
   vpc_id                  = aws_vpc.app_vpc.id
   cidr_block              = var.pub_sub2_cidr
-  availability_zone       = "us-east-2b"
+  availability_zone       = "us-west-2b"
   map_public_ip_on_launch = true
   tags = {
     Name        = "${var.project_name}-pub_sub2"
@@ -50,7 +50,7 @@ resource "aws_subnet" "pub_sub2" {
 resource "aws_subnet" "prv_sub1" {
   vpc_id                  = aws_vpc.app_vpc.id
   cidr_block              = var.prv_sub1_cidr
-  availability_zone       = "us-east-2a"
+  availability_zone       = "us-west-2a"
   map_public_ip_on_launch = false
   tags = {
     Name        = "${var.project_name}-prv_sub1"
@@ -62,7 +62,7 @@ resource "aws_subnet" "prv_sub1" {
 resource "aws_subnet" "prv_sub2" {
   vpc_id                  = aws_vpc.app_vpc.id
   cidr_block              = var.prv_sub2_cidr
-  availability_zone       = "us-east-2b"
+  availability_zone       = "us-west-2b"
   map_public_ip_on_launch = false
   tags = {
     Name        = "${var.project_name}-prv_sub2"
@@ -74,7 +74,7 @@ resource "aws_subnet" "prv_sub2" {
 resource "aws_subnet" "database-subnet-1" {
   vpc_id            = aws_vpc.app_vpc.id
   cidr_block        = var.db_sub1_cidr
-  availability_zone = "us-east-2a"
+  availability_zone = "us-west-2a"
   tags = {
     Name        = "${var.project_name}-database-subnet-1"
     Environment = var.environment
@@ -84,7 +84,7 @@ resource "aws_subnet" "database-subnet-1" {
 resource "aws_subnet" "database-subnet-2" {
   vpc_id            = aws_vpc.app_vpc.id
   cidr_block        = var.db_sub2_cidr
-  availability_zone = "us-east-2b"
+  availability_zone = "us-west-2b"
   tags = {
     Name        = "${var.project_name}-database-subnet-2"
     Environment = var.environment

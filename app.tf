@@ -12,7 +12,7 @@ resource "aws_vpc" "app_vpc" {
 resource "aws_subnet" "pub_sub1" {
   vpc_id                  = aws_vpc.app_vpc.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-2a"
+  availability_zone       = "us-west-2a"
   map_public_ip_on_launch = true
   tags = {
     Name = "pub-1a"
@@ -23,7 +23,7 @@ resource "aws_subnet" "pub_sub1" {
 resource "aws_subnet" "pub_sub2" {
   vpc_id                  = aws_vpc.app_vpc.id
   cidr_block              = "10.0.7.0/24"
-  availability_zone       = "us-east-2b"
+  availability_zone       = "us-west-2b"
   map_public_ip_on_launch = true
   tags = {
     Name = "pub-2a"
@@ -34,7 +34,7 @@ resource "aws_subnet" "pub_sub2" {
 resource "aws_subnet" "prv_sub1" {
   vpc_id                  = aws_vpc.app_vpc.id
   cidr_block              = "10.0.3.0/24"
-  availability_zone       = "us-east-2a"
+  availability_zone       = "us-west-2a"
   map_public_ip_on_launch = false
 
   tags = {
@@ -46,7 +46,7 @@ resource "aws_subnet" "prv_sub1" {
 resource "aws_subnet" "prv_sub2" {
   vpc_id                  = aws_vpc.app_vpc.id
   cidr_block              = "10.0.4.0/24"
-  availability_zone       = "us-east-2b"
+  availability_zone       = "us-west-2b"
   map_public_ip_on_launch = false
 
   tags = {
@@ -58,7 +58,7 @@ resource "aws_subnet" "prv_sub2" {
 resource "aws_subnet" "database-subnet-1" {
   vpc_id            = aws_vpc.app_vpc.id
   cidr_block        = "10.0.5.0/24"
-  availability_zone = "us-east-2a"
+  availability_zone = "us-west-2a"
 
   tags = {
     Name = "Database-1a"
@@ -68,7 +68,7 @@ resource "aws_subnet" "database-subnet-1" {
 resource "aws_subnet" "database-subnet-2" {
   vpc_id            = aws_vpc.app_vpc.id
   cidr_block        = "10.0.6.0/24"
-  availability_zone = "us-east-2b"
+  availability_zone = "us-west-2b"
 
   tags = {
     Name = "Database-2b"
@@ -378,11 +378,11 @@ resource "aws_security_group" "dbserver_sg" {
 }
 
 #This shouldn't be hardcoded
-resource "aws_default_subnet" "default_us-east-2a" {
-  availability_zone = "us-east-2a"
+resource "aws_default_subnet" "default_us-west-2a" {
+  availability_zone = "us-west-2a"
 
   tags = {
-    Name = "Default subnet for us-east-2a"
+    Name = "Default subnet for us-west-2a"
   }
 }
 

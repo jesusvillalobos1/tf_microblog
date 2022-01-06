@@ -1,6 +1,6 @@
 variable "aws_region" {
   description = "aws region to work on"
-  default     = "us-east-2"
+  default     = "us-west-2"
 }
 
 variable "db_engine" {
