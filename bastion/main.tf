@@ -11,12 +11,6 @@
 #}
 
 
-###This key must be encrypted
-resource "aws_key_pair" "rafael_key" {
-  key_name   = "rafael_key"
-  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMleeMMo9Nf2Po3tYf1nBFPvX+7DaUbqtEop0QEqDf2Z rafaelrojas@C02G95CEMD6R"
-}
-
 # Define the security group for the Bastion
 resource "aws_security_group" "app-bastion-sg" {
   name        = "app-bastion-sg"
