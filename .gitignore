@@ -5,3 +5,5 @@ terraform.tfstate.backup
 *.backup
 .vagrant
 .DS_Store
+appserver-manifest.json
+bastion-manifest.json
