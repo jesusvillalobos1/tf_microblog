@@ -1,0 +1,4 @@
+SECRET_KEY=719adf3745d14427bd42a4c03a3b8161
+MAIL_SERVER=localhost
+MAIL_PORT=25
+DATABASE_URL=mysql+pymysql://microblog:microdbpwd@localhost:3306/microblog

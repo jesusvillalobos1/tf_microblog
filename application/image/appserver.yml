@@ -50,6 +50,12 @@
       with_file:
         - '../../keys/ssh/id_rsa.pub' 
 
+    - name: Run command tu setup postfix 
+      command: debconf-set-selections <<< "postfix postfix/mailname string bigproject.name"
+
+    - name: Run command tu setup postfix mailer type
+      command: debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
+
     - name: Install required packages
       apt:
         pkg:
@@ -57,38 +63,82 @@
           - supervisor
           - nginx
           - git
+          - python3-pip
+          - postfix
         state: latest
         update_cache: true
 
-    - name: Run command tu setup postfix 
-      command: debconf-set-selections <<< "postfix postfix/mailname string bigproject.name"
-
-    - name: Run command tu setup postfix mailer type
-      command: debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
-
-    - name: Install postfix
-      apt:
-        pkg:
-          - postfix
-
-    - name: Example clone of a single branch
+    - name: Clone microblog repo
       git:
         repo: https://github.com/miguelgrinberg/microblog
         dest: /tmp/microblog
-
 
     - name: Setup microblog branch
       args:
         chdir: /tmp/microblog
       command: git checkout v0.17
 
-    - name: Copy repo to /home/deploy
-      copy: remote_src=True src=/path/to/foo dest=/path/to/bar
+    - name: Run command tu setup python dependencies
+      pip:
+        requirements: /tmp/microblog/requirements.txt
 
+    - name: Install multi python packages gunicorn pymysql cryptography
+      pip:
+        name:
+          - gunicorn
+          - pymysql
+          - cryptography
 
-    - name: Setup python
-      become: yes
-      become_user: deploy
-      args:
-        chdir: /home/deploy/microblog
-      command: python3 -m venv venv; source venv/bin/activate; pip install -r requirements.txt; pip install gunicorn pymysql cryptography; echo "export FLASK_APP=microblog.py" >> ~/.profile
+    - name: Copy microblog repo from /tmp to /home/deploy
+      copy: remote_src=True src=/tmp/microblog dest=/home/deploy
+
+    - name: Change file ownership, group and permissions of microblog repo
+      ansible.builtin.file:
+        path: /home/deploy/microblog
+        owner: deploy
+        group: deploy
+        mode: '0755'
+    
+    - name: moving .env file to deploy user
+      ansible.builtin.copy:
+        src: ../files/env
+        dest: /home/deploy/.env
+        owner: deploy
+        group: deploy
+        mode: '0744' 
+
+    - name: moving microblog.conf supervisor file to host
+      ansible.builtin.copy:
+        src: ../files/microblog.conf
+        dest: /etc/supervisor/conf.d/microblog.conf 
+
+    - name: moving certs
+      ansible.builtin.copy:
+        src: ../files/certs
+        dest: /home/deploy/
+        owner: deploy
+        group: deploy
+        mode: '0664'  
+
+    - name: Remove default nginx config
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent        
+
+    - name: moving microblog nginx config to host
+      ansible.builtin.copy:
+        src: ../files/nginx/microblog
+        dest: /etc/nginx/sites-enabled/microblog
+
+    - name: restart nginx service
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+
+    - name: Enable nginx service for startup
+      ansible.builtin.service:
+        name: nginx
+        enabled: yes
+
+    - name: Reload upervisord service
+      command: service supervisor reload

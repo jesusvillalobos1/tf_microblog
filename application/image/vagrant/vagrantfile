@@ -14,9 +14,8 @@ Vagrant.configure("2") do |config|
     appserver.vm.network "private_network", ip: "192.168.56.10"
     appserver.vm.hostname = "appserver"
     appserver.vm.synced_folder ".", "/vagrant", type: "virtualbox"
-    #appserver.vm.provision "shell", path: "provision-app.sh"
     config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "../../application/image/appserver.yml"  
+      ansible.playbook = "../appserver.yml"  
     end
   end
 
