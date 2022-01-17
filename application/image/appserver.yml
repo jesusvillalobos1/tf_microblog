@@ -109,7 +109,7 @@
 
     - name: moving microblog.conf supervisor file to host
       ansible.builtin.copy:
-        src: ../files/microblog.conf
+        src: ../files/microblog.nossl
         dest: /etc/supervisor/conf.d/microblog.conf 
 
     - name: moving certs
