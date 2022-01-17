@@ -49,7 +49,6 @@ resource "aws_eip" "app-bastion-eip" {
 resource "aws_instance" "app-bastion-host" {
   ami                         = var.bastion_ami
   instance_type               = var.instance_type
-  key_name                    = aws_key_pair.rafael_key.id
   subnet_id                   = data.terraform_remote_state.network.outputs.pub_sub1
   vpc_security_group_ids      = [ aws_security_group.app-bastion-sg.id]
   associate_public_ip_address = true
