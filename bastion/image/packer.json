@@ -48,10 +48,10 @@
   "post-processors": [
     {
       "type": "manifest",
-      "output": "appserver-manifest.json",
+      "output": "bastion-manifest.json",
       "strip_path": true,
       "custom_data": {
-        "my_custom_data": "appserver-manifest"
+        "my_custom_data": "bastion-manifest"
       }
     }
   ]
