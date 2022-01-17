@@ -1,0 +1,58 @@
+{
+    "variables": {
+      "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
+      "aws_secret_key": "{{env `AWS_SECRET_KEY`}}",
+      "aws_region": "{{env `AWS_REGION`}}"
+    },
+    "builders": [
+      {
+        "type": "amazon-ebs",
+        "region": "{{user `aws_region`}}",
+        "access_key": "{{user `aws_access_key`}}",
+        "secret_key": "{{user `aws_secret_key`}}",
+        "source_ami_filter": {
+          "filters": {
+            "name": "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+          },
+          "owners": ["099720109477"],
+          "most_recent": true
+        },
+        "instance_type": "t2.micro",
+        "ssh_username": "ubuntu",
+        "encrypt_boot": true,
+        "ami_name": "app-server- ",
+        "ami_description": "App server for Big APP, based on Ubuntu 20.04LTS",
+        "tags": {
+          "Name": "app-server-{{timestamp}}",
+          "ubuntu:release": "20.04 LTS",
+          "ubuntu:branch": "focal"
+        },
+        "launch_block_device_mappings": [
+          {
+            "device_name": "/dev/sda1",
+            "volume_size": 8,
+            "volume_type": "gp2",
+            "delete_on_termination": "true"
+          }
+        ]
+      }
+    ],
+  
+    "provisioners": [
+      {
+        "type": "ansible",
+        "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ],
+        "playbook_file": "../appserver.yml"
+      }
+    ],
+  "post-processors": [
+    {
+      "type": "manifest",
+      "output": "appserver-manifest.json",
+      "strip_path": true,
+      "custom_data": {
+        "my_custom_data": "appserver-manifest"
+      }
+    }
+  ]
+}  
