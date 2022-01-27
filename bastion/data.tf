@@ -20,3 +20,23 @@ data "terraform_remote_state" "network" {
     path = "../network/terraform.tfstate"
   }
 }
+
+data "aws_ami" "latest-bastion" {
+  most_recent      = true
+  owners           = ["385794018617"]
+
+  filter {
+    name   = "name"
+    values = ["bastion-image*"]
+  }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
