@@ -1,13 +1,5 @@
-# Use terraform cloud as a backend  UNCOMMENT UNTIL PROOF OF CONCEPT IS DONE
-#terraform {
-#  backend "remote" {
-#    hostname = "app.terraform.io"
-#    organization = "big-app"
-
-#    workspaces {
-#      name = "big-project"
-#    }
-#  }
+#data "aws_availability_zones" "available" {
+#  state = "available"
 #}
 
 #####DB instance setup
