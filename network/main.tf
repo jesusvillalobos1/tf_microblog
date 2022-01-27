@@ -1,20 +1,6 @@
-
-# Use terraform cloud as a backend  UNCOMMENT UNTIL PROOF OF CONCEPT IS DONE
-#terraform {
-#  backend "remote" {
-#    hostname = "app.terraform.io"
-#    organization = "big-app"
-
-#    workspaces {
-#      name = "big-project"
-#    }
-#  }
-#}
-
 data "aws_availability_zones" "available" {
   state = "available"
 }
-
 
 # Create VPC
 resource "aws_vpc" "app_vpc" {
@@ -26,8 +12,6 @@ resource "aws_vpc" "app_vpc" {
     Environment = var.environment
   }
 }
-
-#data.aws_availability_zones.available.names[0]  = "us-west-2a"
 
 # Create Public Subnet1
 resource "aws_subnet" "pub_sub1" {
@@ -41,7 +25,6 @@ resource "aws_subnet" "pub_sub1" {
   }
 }
 
-#data.aws_availability_zones.available.names[1]  = "us-west-2b"
 # Create Public Subnet2
 resource "aws_subnet" "pub_sub2" {
   vpc_id                  = aws_vpc.app_vpc.id
