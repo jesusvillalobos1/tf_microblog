@@ -47,7 +47,7 @@ resource "aws_eip" "app-bastion-eip" {
 
 # Create EC2 Instance for Bastion Server
 resource "aws_instance" "app-bastion-host" {
-  ami                         = var.bastion_ami
+  ami                         = data.aws_ami.latest-bastion.id
   instance_type               = var.instance_type
   subnet_id                   = data.terraform_remote_state.network.outputs.pub_sub1
   vpc_security_group_ids      = [ aws_security_group.app-bastion-sg.id]
