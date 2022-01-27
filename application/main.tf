@@ -54,7 +54,7 @@ resource "aws_key_pair" "rafael_app_key" {
 resource "aws_launch_configuration" "webserver-launch-config" {
   name_prefix   = "webserver-launch-config"
   #Image id should not be hardcoded
-  image_id      = var.app_ami
+  image_id      = data.aws_ami.latest-appserver.id
   instance_type = var.app_instance_type
   key_name = aws_key_pair.rafael_app_key.id
   security_groups = [aws_security_group.webserver_sg.id]
