@@ -18,10 +18,10 @@ Clone repo:
 ```
 
 **total number of resources to be created in AWS from terraform module:
-Network     = 21 
+Network     = 21
 Database    = 3
-Application = 7 
-Bastion     = 4 
+Application = 7
+Bastion     = 4
 
 
 Deploy Network: 
