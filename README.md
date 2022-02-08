@@ -103,11 +103,15 @@ to:
 
    &nbsp;
 
-4 We will now build the app server golden image using packer:
- go to the directory:
-/big-project/Images/AppServer
-**This process will take about 20 min
-run the command:
+4 We will now build the app server golden image using packer  
+
+go to the directory:  
+
+/big-project/Images/AppServer  
+
+**This process will take about 20 min  
+
+run the command:  
 
 ```
 
@@ -118,9 +122,13 @@ run the command:
   
 
 5 Once it builds golden image for app server go to the directory:
+
 /big-project/application
+
 Open the "data.tf" (line 24) and update "owner"
+
 To reflect the actual owner of the AMI in AWS
+
 (you can view that info in the AWS console in EC2-AMIs)
 
 Now when we deploy infrastructure, the code will catch up automatically latest available AMI build:
@@ -140,10 +148,13 @@ Now when we deploy infrastructure, the code will catch up automatically latest a
    &nbsp;
  
 
-6 Now we will build the golden image for the bastion server
-go to directory:
-/big-project/Images/Bastion
-to build the bastion image, run the command:
+6 Now we will build the golden image for the bastion server  
+
+go to directory:  
+
+/big-project/Images/Bastion  
+
+to build the bastion image, run the command:  
 
 ```
 
@@ -153,9 +164,11 @@ to build the bastion image, run the command:
  &nbsp;
   
 
-7 Once it builds golden image for bastion server, go to the directory:
-/big-project/bastion
-Now when we deploy infrastructure, the code will catch up automatically latest available AMI build:
+7 Once it builds golden image for bastion server, go to the directory:  
+
+/big-project/bastion  
+
+Now when we deploy infrastructure, the code will catch up automatically latest available AMI build:  
 
 ```
 
