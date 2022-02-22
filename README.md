@@ -2,7 +2,9 @@
 
   
 
-Bug project to test and learn infrastructure as code (Terraform), configuration management (Ansible) and golden image standards (packer). Everything built to deploy a Python3 flask app: microblog. For education and testing purposes.
+Big project to test and learn infrastructure as code (Terraform), configuration management (Ansible) and golden image standards (packer). Everything built to deploy a Python3 flask app: microblog. 
+
+For education and testing purposes.
 
   
 
